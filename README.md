@@ -15,10 +15,10 @@ import (
 )
 
 func main() {
-	requestResponseDump, err := gzip_log.NewGzBufFile("request_log.ndjson.gz")
-	if err != nil {
-		log.Printf("init log failed %s\n", err.Error())
-	}
+    requestResponseDump, err := gzip_log.NewGzBufFile("request_log.ndjson.gz")
+    if err != nil {
+        log.Printf("init log failed %s\n", err.Error())
+    }
     requestResponseDump.WriteTwoLines(requestBody, responseData)
     if requestResponseDump != nil {
         requestResponseDump.Close()
