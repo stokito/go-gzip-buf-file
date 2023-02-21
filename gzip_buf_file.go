@@ -60,9 +60,13 @@ func (f *GzBufFile) WriteTwoLines(line1 []byte, line2 []byte) error {
 }
 
 func (f *GzBufFile) Close() error {
-	_ = f.bufWriter.Flush()
-	_ = f.gzipWriter.Flush()
+	_ = f.Flush()
 	// Close the gzip first.
 	_ = f.gzipWriter.Close()
 	return f.outputFile.Close()
+}
+
+func (f *GzBufFile) Flush() error {
+	_ = f.bufWriter.Flush()
+	return f.gzipWriter.Flush()
 }
