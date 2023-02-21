@@ -3,7 +3,7 @@ gzip compressed log/file
 
 ## Install
 
-    go get -u github.com/stokito/go-gzip-buf-file@v1.0.0
+    go get -u github.com/stokito/go-gzip-buf-file@v1.1.0
 
 ## Usage
 ```go
