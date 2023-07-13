@@ -71,8 +71,8 @@ func (f *GzBufFile) WriteTwoLines(line1, line2 []byte) error {
 // Each part is a byte slice that can be nil. It's similar to WriteTo but doesn't need allocate a net.Buffers
 // Example:
 //
-//	WriteTwoLinesParts(`{"body":"`, reqBodyJsonEncoded, `"}`, response, nil, nil)
-func (f *GzBufFile) WriteTwoLinesParts(line1_1, line1_2, line1_3, line2_1, line2_2, line2_3 []byte) error {
+//	WriteTwoLinesParts(`{"body":"`, reqBodyJsonEncoded, `"}`, nil, nil, nil, response, nil, nil, nil, nil, nil)
+func (f *GzBufFile) WriteTwoLinesParts(line1_1, line1_2, line1_3, line1_4, line1_5, line1_6, line2_1, line2_2, line2_3, line2_4, line2_5, line2_6 []byte) error {
 	f.mu.Lock()
 	err := (f.bufWriter).WriteByte('\n')
 	if err == nil && line1_1 != nil {
@@ -83,6 +83,15 @@ func (f *GzBufFile) WriteTwoLinesParts(line1_1, line1_2, line1_3, line2_1, line2
 	}
 	if err == nil && line1_3 != nil {
 		_, err = (f.bufWriter).Write(line1_3)
+	}
+	if err == nil && line1_4 != nil {
+		_, err = (f.bufWriter).Write(line1_4)
+	}
+	if err == nil && line1_5 != nil {
+		_, err = (f.bufWriter).Write(line1_5)
+	}
+	if err == nil && line1_6 != nil {
+		_, err = (f.bufWriter).Write(line1_6)
 	}
 	if err == nil {
 		err = (f.bufWriter).WriteByte('\n')
@@ -95,6 +104,15 @@ func (f *GzBufFile) WriteTwoLinesParts(line1_1, line1_2, line1_3, line2_1, line2
 	}
 	if err == nil && line2_3 != nil {
 		_, err = (f.bufWriter).Write(line2_3)
+	}
+	if err == nil && line2_4 != nil {
+		_, err = (f.bufWriter).Write(line2_4)
+	}
+	if err == nil && line2_5 != nil {
+		_, err = (f.bufWriter).Write(line2_5)
+	}
+	if err == nil && line2_6 != nil {
+		_, err = (f.bufWriter).Write(line2_6)
 	}
 	f.mu.Unlock()
 	return err
