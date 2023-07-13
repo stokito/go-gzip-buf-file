@@ -4,7 +4,9 @@ package gzip_log
 
 import (
 	"bufio"
+	"bytes"
 	"compress/gzip"
+	"io"
 	"os"
 	"sync"
 )
@@ -38,22 +40,61 @@ func (f *GzBufFile) WriteString(s string) (int, error) {
 
 func (f *GzBufFile) Write(data []byte) (n int, err error) {
 	f.mu.Lock()
-	n, err = f.bufWriter.Write(data)
+	if data != nil {
+		n, err = f.bufWriter.Write(data)
+	}
 	f.mu.Unlock()
 	return n, err
 }
 
-func (f *GzBufFile) WriteTwoLines(line1 []byte, line2 []byte) error {
+// WriteTwoLines writes two byte slices with new line separator at once
+// Example:
+//
+//	WriteTwoLines(requestBody, responseData)
+func (f *GzBufFile) WriteTwoLines(line1, line2 []byte) error {
 	f.mu.Lock()
 	err := (f.bufWriter).WriteByte('\n')
-	if err == nil {
+	if err == nil && line1 != nil {
 		_, err = (f.bufWriter).Write(line1)
 	}
 	if err == nil {
 		err = (f.bufWriter).WriteByte('\n')
 	}
-	if err == nil {
+	if err == nil && line2 != nil {
 		_, err = (f.bufWriter).Write(line2)
+	}
+	f.mu.Unlock()
+	return err
+}
+
+// WriteTwoLinesParts write two lines and each line can be in few parts to avoid concatenation.
+// Each part is a byte slice that can be nil. It's similar to WriteTo but doesn't need allocate a net.Buffers
+// Example:
+//
+//	WriteTwoLinesParts(`{"body":"`, reqBodyJsonEncoded, `"}`, response, nil, nil)
+func (f *GzBufFile) WriteTwoLinesParts(line1_1, line1_2, line1_3, line2_1, line2_2, line2_3 []byte) error {
+	f.mu.Lock()
+	err := (f.bufWriter).WriteByte('\n')
+	if err == nil && line1_1 != nil {
+		_, err = (f.bufWriter).Write(line1_1)
+	}
+	if err == nil && line1_2 != nil {
+		_, err = (f.bufWriter).Write(line1_2)
+	}
+	if err == nil && line1_3 != nil {
+		_, err = (f.bufWriter).Write(line1_3)
+	}
+	if err == nil {
+		err = (f.bufWriter).WriteByte('\n')
+	}
+	if err == nil && line2_1 != nil {
+		_, err = (f.bufWriter).Write(line2_1)
+	}
+	if err == nil && line2_2 != nil {
+		_, err = (f.bufWriter).Write(line2_2)
+	}
+	if err == nil && line2_3 != nil {
+		_, err = (f.bufWriter).Write(line2_3)
 	}
 	f.mu.Unlock()
 	return err
@@ -69,4 +110,13 @@ func (f *GzBufFile) Close() error {
 func (f *GzBufFile) Flush() error {
 	_ = f.bufWriter.Flush()
 	return f.gzipWriter.Flush()
+}
+
+// ReadAll Read contents of the log file
+// Used for tests
+func (f *GzBufFile) ReadAll() []byte {
+	fileBytes, _ := os.ReadFile(f.outputFile.Name())
+	gzreader, _ := gzip.NewReader(bytes.NewReader(fileBytes))
+	decoded, _ := io.ReadAll(gzreader)
+	return decoded
 }
